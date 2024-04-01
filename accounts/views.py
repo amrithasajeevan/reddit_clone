@@ -39,6 +39,7 @@ class RegistrationView(generics.CreateAPIView):
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
+
 class ExploreUsers(APIView):
 
     def get(self, request, format=None):

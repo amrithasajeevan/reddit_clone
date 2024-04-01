@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('image/', views.Images.as_view(), name='feed'),
@@ -11,5 +12,5 @@ urlpatterns = [
     path('<int:image_id>/comments/<int:comment_id>/', views.ModerateComments.as_view(), name='moderate_comments'),
     path('comment/<int:comment_id>/', views.Comments.as_view(), name='comment'),
     path('search/', views.Search.as_view(), name='search'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

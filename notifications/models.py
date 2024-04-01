@@ -1,10 +1,10 @@
 from django.db import models
-from  accounts import models as user_models
-from images import models as image_models
+from  accounts.models import *
+from images.models import *
 
 
 
-class Notification(image_models.TimeStampedModel):
+class Notification(TimeStampedModel):
 
     TYPE_CHOICES = (
         ('like', 'Like'),
@@ -12,10 +12,10 @@ class Notification(image_models.TimeStampedModel):
         ('follow', 'Follow')
     )
 
-    creator = models.ForeignKey(user_models.CustomUser, related_name='creator',on_delete=models.CASCADE)
-    to = models.ForeignKey(user_models.CustomUser, related_name='to',on_delete=models.CASCADE)
+    creator = models.ForeignKey(CustomUser, related_name='creator',on_delete=models.CASCADE)
+    to = models.ForeignKey(CustomUser, related_name='to',on_delete=models.CASCADE)
     notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    image = models.ForeignKey(image_models.Image, null=True, blank=True,on_delete=models.CASCADE)
+    image = models.ForeignKey(Image, null=True, blank=True,on_delete=models.CASCADE)
     comment = models.TextField(null=True, blank=True)
 
     class Meta:
