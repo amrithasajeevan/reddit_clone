@@ -38,7 +38,7 @@ class Images(APIView):
         serializer = ImageSerializer(
             sorted_list, many=True, context={'request': request})
 
-        return Response(serializer.data)
+        return Response({'status':1,'data':serializer.data})
 
     def post(self, request, format=None):
 
@@ -51,11 +51,11 @@ class Images(APIView):
 
             serializer.save(creator=user)
 
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_201_CREATED)
 
         else:
             print(serializer.errors)
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LikeImage(APIView):
@@ -71,7 +71,7 @@ class LikeImage(APIView):
         serializer = ListUserSerializer(
             users, many=True, context={'request': request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request, image_id, format=None):
 
@@ -80,7 +80,7 @@ class LikeImage(APIView):
         try:
             found_image = Image.objects.get(id=image_id)
         except Image.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':0,'error':'image does not exist'},status=status.HTTP_404_NOT_FOUND)
 
         try:
             preexisiting_like = Like.objects.get(
@@ -101,7 +101,7 @@ class LikeImage(APIView):
             notification_views.create_notification(
                 user, found_image.creator, 'like', found_image)
 
-            return Response(status=status.HTTP_201_CREATED)
+            return Response({'status':1,'message':"like"},status=status.HTTP_201_CREATED)
 
 
 class UnLikeImage(APIView):
@@ -117,11 +117,11 @@ class UnLikeImage(APIView):
             )
             preexisiting_like.delete()
 
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'status':1,'data':{}},status=status.HTTP_204_NO_CONTENT)
 
         except Like.DoesNotExist:
 
-            return Response(status=status.HTTP_304_NOT_MODIFIED)
+            return Response({'status':0,'error':'like does not exists'},status=status.HTTP_304_NOT_MODIFIED)
 
 
 class CommentOnImage(APIView):
@@ -144,11 +144,11 @@ class CommentOnImage(APIView):
             notification_views.create_notification(
                 user, found_image.creator, 'comment', found_image, serializer.data['message'])
 
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_201_CREATED)
 
         else:
 
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Comments(APIView):
@@ -159,9 +159,9 @@ class Comments(APIView):
             comment=get_object_or_404(Comment, id=comment_id, creator=user)
             print(comment)
             comment.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'status':1,'error':'deleted'},status=status.HTTP_204_NO_CONTENT)
         except :
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':0,'error':'item not found'},status=status.HTTP_404_NOT_FOUND)
 
 
 class Search(APIView):
@@ -180,14 +180,14 @@ class Search(APIView):
             serializer = serializers.ImageSerializer(
                 images, many=True, context={'request': request})
 
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
         else:
 
             images = models.Image.objects.all()[:20]
             serializer = serializers.ImageSerializer(
                 images, many=True, context={'request': request})
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class ModerateComments(APIView): # for the image uploaded owner
@@ -227,7 +227,7 @@ class ImageDetail(APIView):
         serializer = ImageSerializer(
             image, context={'request': request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
     def put(self, request, image_id, format=None):
 
@@ -246,11 +246,11 @@ class ImageDetail(APIView):
 
             serializer.save(creator=user)
 
-            return Response(data=serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_204_NO_CONTENT)
 
         else:
 
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, image_id, format=None):
 
@@ -260,8 +260,8 @@ class ImageDetail(APIView):
 
         if image is None:
 
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'error':"image not found"},status=status.HTTP_400_BAD_REQUEST)
 
         image.delete()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'status':1,'item':"deleted"},status=status.HTTP_204_NO_CONTENT)

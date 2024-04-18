@@ -35,8 +35,9 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         response_data = {
+            'status':1,
             'message': 'User registered successfully',
-            'user': serializer.data
+            'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -50,7 +51,7 @@ class ExploreUsers(APIView):
         serializer = ListUserSerializer(
             last_five, many=True, context={"request": request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class FollowUser(APIView):
@@ -71,7 +72,7 @@ class FollowUser(APIView):
 
         views.create_notification(user, user_to_follow, 'follow')
 
-        return Response(status=status.HTTP_200_OK)
+        return Response({'status':1,'message':"following"},status=status.HTTP_200_OK)
 
 
 class UnFollowUser(APIView):
@@ -89,7 +90,7 @@ class UnFollowUser(APIView):
 
         user.save()
 
-        return Response(status=status.HTTP_200_OK)
+        return Response({'status':1,'message':"unfollowing"},status=status.HTTP_200_OK)
 
 
 class UserProfile(APIView):
@@ -108,12 +109,12 @@ class UserProfile(APIView):
 
         if found_user is None:
 
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':0,'message':"user not found"},status=status.HTTP_404_NOT_FOUND)
 
         serializer = UserProfileSerializer(
             found_user, context={'request': request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
     def put(self, request, username, format=None):
 
@@ -123,11 +124,11 @@ class UserProfile(APIView):
 
         if found_user is None:
 
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':0,'message':"user not found"},status=status.HTTP_404_NOT_FOUND)
 
         elif found_user.username != user.username:
 
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'message':"user not found"},status=status.HTTP_400_BAD_REQUEST)
 
         else:
 
@@ -138,11 +139,11 @@ class UserProfile(APIView):
 
                 serializer.save()
 
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
+                return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
             else:
 
-                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'status':0,'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserFollowers(APIView):
@@ -159,7 +160,7 @@ class UserFollowers(APIView):
         serializer = ListUserSerializer(
             user_followers, many=True, context={"request": request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class UserFollowing(APIView):
@@ -176,7 +177,7 @@ class UserFollowing(APIView):
         serializer = ListUserSerializer(
             user_following, many=True, context={"request": request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class Search(APIView):
@@ -192,8 +193,8 @@ class Search(APIView):
             serializer = ListUserSerializer(
                 users, many=True, context={"request": request})
 
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
 
         else:
 
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'data':serializer.data},status=status.HTTP_400_BAD_REQUEST)

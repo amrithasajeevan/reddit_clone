@@ -201,7 +201,7 @@ class CommentCreateView(APIView):
     def get(self, request, post_id):
         comments = Comment.objects.filter(post=post_id)
         serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+        return Response({'status':1,'data':serializer.data})
     
     def post(self, request, post_id):
         post = get_object_or_404(CommunityPost, id=post_id)
@@ -211,9 +211,9 @@ class CommentCreateView(APIView):
         if author_username:
             author = CustomUser.objects.filter(username=author_username).first()
             if not author:
-                return Response({"error": "Author not found."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'status':0,'error':serializer.errors}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"error": "Author not provided."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
         # Prepare comment data
         comment_data = {
@@ -224,8 +224,8 @@ class CommentCreateView(APIView):
         serializer = CommentSerializer(data=comment_data, context={'author': author})  # Pass author to serializer context
         if serializer.is_valid():
             serializer.save()  # No need to pass author here as it's in the context
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'status':0,'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 
 
@@ -233,27 +233,27 @@ class CommentDetailView(APIView):
     def get(self, request, post_id, comment_id):
         comment = get_object_or_404(Comment, id=comment_id, post=post_id)
         serializer = CommentSerializer(comment)
-        return Response(serializer.data)
+        return Response({'status':1,'data':serializer.data})
 
     def put(self, request, post_id, comment_id):
         comment = get_object_or_404(Comment, id=comment_id, post=post_id)
 
         # Check if the user is the author of the comment
         if comment.author != request.user:
-            return Response({"error": "You don't have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'status':0,'data':serializer.errors}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = CommentSerializer(comment, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':1,'data':serializer.data})
+        return Response({'status':0,'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, post_id, comment_id):
         comment = get_object_or_404(Comment, id=comment_id, post=post_id)
 
         # Check if the user is the author of the comment
         if comment.author != request.user:
-            return Response({"error": "You don't have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'status':0,"error": "You don't have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
         comment.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'status':1,'message':"data deleted"},status=status.HTTP_204_NO_CONTENT)

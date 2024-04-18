@@ -18,7 +18,7 @@ class Notifications(APIView):
         serializer = serializers.NotificationSerializer(
             notifications, many=True, context={'request': request})
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response({"status":1,'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 def create_notification(creator, to, notification_type, image=None, comment=None):
