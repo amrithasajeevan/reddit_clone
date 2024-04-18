@@ -23,6 +23,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
         # Include serialized user data in the response
         response.data.update(serializer.validated_data)
+        response.data['status'] = 1 
 
         return response
 
